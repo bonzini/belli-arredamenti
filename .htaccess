@@ -1,0 +1,5 @@
+Options +FollowSymlinks
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^.*/foto/
+RewriteCond %{REQUEST_URI} !^.*/index.php
+RewriteRule ^(.*/foto)/(.*)$ $1/index.php/$2 [L]
