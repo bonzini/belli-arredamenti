@@ -85,6 +85,17 @@ function mysql_check_one_row ($result)
     trigger_error('attesi 0 o 1 record', E_USER_ERROR);
 }
 
+function mysql_execute_fetch_row ()
+{
+  $args = func_get_args ();
+  $result = call_user_func_array ('mysql_unbuffered_execute', $args);
+  $row = mysqli_fetch_row($result);
+  if (!$row)
+    return FALSE;
+  mysql_check_one_row ($result);
+  return $row;
+}
+
 function mysql_execute_fetch_val ()
 {
   $args = func_get_args ();

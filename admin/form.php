@@ -174,6 +174,43 @@ class TextField extends DBField
   }
 }
 
+function db_read_dir($name)
+{
+  global $sqlconn;
+  $result = array();
+  $stmt = mysqli_prepare($sqlconn, 'select name from files where name like ?');
+  mysqli_stmt_bind_param($stmt, 's', $name . '/%');
+  mysqli_stmt_execute($stmt);
+  mysqli_stmt_bind_result($stmt, $name);
+  while ($stmt->fetch())
+    array_push($result, $name);
+  mysqli_stmt_close($stmt);
+  return $result;
+}
+
+function db_upload_file($name, $file)
+{
+  global $sqlconn;
+  $fp = fopen($file, 'r');
+  $stmt = mysqli_prepare($sqlconn, 'replace into files(name, contents) values(?, ?)');
+  $dummy = NULL;
+  mysqli_stmt_bind_param($stmt, 'sb', $name, $dummy);
+  while (!feof($fp))
+    mysqli_stmt_send_long_data($stmt, 1, fread($fp, 8192));
+  fclose($fp);
+  mysqli_stmt_execute($stmt);
+  mysqli_stmt_close($stmt);
+}
+
+function db_delete_file($name)
+{
+  global $sqlconn;
+  $stmt = mysqli_prepare($sqlconn, 'delete from files where name = ?');
+  mysqli_stmt_bind_param($stmt, 's', $name);
+  mysqli_stmt_execute($stmt);
+  mysqli_stmt_close($stmt);
+}
+
 class FileField extends DBField
 {
   var $base;
@@ -182,7 +219,7 @@ class FileField extends DBField
   function __construct (&$form, $base, $label)
   {
     parent::__construct ($form, basename ($base));
-    $this->base = FILEBASE . $base;
+    $this->base = $base;
     $this->label = $label;
   }
   
@@ -225,17 +262,20 @@ class FileField extends DBField
   function render_files ()
   {
     $id = $this->form->id;
-    $dirname = $this->base . '/' . $id.'/';
+    $dirname = $this->base . '/' . $id;
 
-    if ($id && is_dir ($dirname) && $dir = @opendir($dirname))
+    if (!$id)
+      return;
+
+    $files = db_read_dir($dirname);
+    if (count($files))
       {
 	echo '<ul class="checkbox-list">';
-	for ($i = 0; ($file = readdir($dir)) !== FALSE; )
-	  if (substr ($file, 0, 1) != '.')
-	    $this->render_file ($i++, "$dirname$file");
+	$i = 0;
+	foreach ($file in $files)
+	  $this->render_file ($i++, "$dirname/$file");
 	  
 	echo '</ul>';
-	closedir($dir);
       }
   }
 
@@ -305,13 +345,13 @@ class FileField extends DBField
 
   function delete_file ($dirname, $name)
   {
-    unlink ($dirname . $name);
+    db_delete_file ($dirname . $name);
   }
 
   function upload_file ($src, $dirname, $name)
   {
-    move_uploaded_file ($src, $dirname . $name);
-    chmod ($dirname . $name, 0666);
+    db_upload_file($dirname . $name, $src);
+    unlink($src);
   }
 
   function delete_file_info ($name)

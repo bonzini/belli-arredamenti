@@ -1,7 +1,5 @@
 <?php
 
-define (FILEBASE, $_ENV['OPENSHIFT_DATA_DIR']);
-
 require ('libs/db.php');
 
 ob_start ();

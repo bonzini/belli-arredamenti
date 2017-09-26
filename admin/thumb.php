@@ -114,33 +114,33 @@ function resize ($filename, $saveTo, $maxx, $maxy, $q) {
 
 class ThumbnailField extends FileField {
   function upload_file ($src, $dirname, $name) {
-    $thumbdir = dirname ($dirname . 'thumb/' . $name);
-    if (!file_exists ($thumbdir))
-      mkdir ($thumbdir,0755);
-
-    resize ($src, $dirname . $name, 900, 600, 85);
-    resize ($src, $dirname . 'thumb/' . $name, 400, 250, 99);
+    resize ($src, $src . '-resized', 900, 600, 85);
+    db_upload_file($src . '-resized', $dirname . $name);
+    unlink($src . '-resized');
+    resize ($src, $src . '-thumb', 400, 250, 99);
+    db_upload_file($src . '-thumb', $dirname . .'thumb/' . $name);
+    unlink($src . '-thumb');
   }
 
   function delete_file ($dirname, $name) {
-    unlink ($dirname . $name);
-    unlink ($dirname . 'thumb/' . $name);
+    db_delete_file ($dirname . $name);
+    db_delete_file ($dirname . 'thumb/' . $name);
   }
 }
 
 class LinkedThumbnailField extends LinkedFileField {
   function upload_file ($src, $dirname, $name) {
-    $thumbdir = dirname ($dirname . 'thumb/' . $name);
-    if (!file_exists ($thumbdir))
-      mkdir ($thumbdir,0755);
-
-    resize ($src, $dirname . $name, 900, 600, 85);
-    resize ($src, $dirname . 'thumb/' . $name, 400, 250, 99);
+    resize ($src, $src . '-resized', 900, 600, 85);
+    db_upload_file($src . '-resized', $dirname . $name);
+    unlink($src . '-resized');
+    resize ($src, $src . '-thumb', 400, 250, 99);
+    db_upload_file($src . '-thumb', $dirname . .'thumb/' . $name);
+    unlink($src . '-thumb');
   }
 
   function delete_file ($dirname, $name) {
-    unlink ($dirname . $name);
-    unlink ($dirname . 'thumb/' . $name);
+    db_delete_file ($dirname . $name);
+    db_delete_file ($dirname . 'thumb/' . $name);
   }
 }
 
