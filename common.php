@@ -141,7 +141,7 @@ define ('PROTEGGI', 0);
 if (!isset ($_SERVER['PHP_AUTH_USER']) || !isset ($_SERVER['PHP_AUTH_PW']))
   {
     $db_user = 'db';
-    $db_password = $_ENV['MYSQL_PASSWORD']';
+    $db_password = $_ENV['MARIADB_PASSWORD'];
   }
 else
   {
@@ -154,7 +154,7 @@ if ((PROTEGGI || strstr ($_SERVER['PHP_SELF'], "admin") !== FALSE)
   site_deny ();
 
 define ('GOOGLE_MAPS_KEY', 'ABQIAAAAJg_ZgaoUTrvXe74lk2pZCBSLA_W6cd0fa8ielUp9C1k46k7_xxSvd-pnpHj3vSI6Yrux_by5hhtrjA');
-($sqlconn = mysqli_connect($_ENV['MYSQL_PORT'], 
+($sqlconn = mysqli_connect($_ENV['MARIADB_SERVICE_HOST'] . ':' . $_ENV['MARIADB_SERVICE_PORT'],
 	                   $db_user, $db_password)) or die(mysqli_connect_error());
 mysqli_query($sqlconn, 'USE belliarredamenti') or die(mysqli_error($sqlconn));
 
